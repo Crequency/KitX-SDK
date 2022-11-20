@@ -108,7 +108,7 @@ namespace KitX.Device.Simulator
 
             System.Timers.Timer timer = new()
             {
-                Interval = 1000,
+                Interval = 2000,
                 AutoReset = true
             };
             timer.Elapsed += (_, _) =>
@@ -221,9 +221,9 @@ namespace KitX.Device.Simulator
                     where ip.AddressFamily == AddressFamily.InterNetworkV6
                         && !ip.ToString().Equals("::1")
                     select ip).First().ToString(),
-            ServingPort = 2000,
-            ServerAddress = "",
-            ServerBuildTime = new(),
+            PluginServerPort = 2000,
+            DeviceServerPort = 0,
+            DeviceServerBuildTime = new(),
             PluginsCount = 0,
         };
 
@@ -240,11 +240,11 @@ namespace KitX.Device.Simulator
                                             where ip.AddressFamily == AddressFamily.InterNetworkV6
                                                 && !ip.ToString().Equals("::1")
                                             select ip).First().ToString();
-            DefaultDeviceInfoStruct.ServingPort = 10000;
+            DefaultDeviceInfoStruct.PluginServerPort = 10000;
             DefaultDeviceInfoStruct.PluginsCount = 0;
             DefaultDeviceInfoStruct.IsMainDevice = false;
-            DefaultDeviceInfoStruct.ServerAddress = "";
-            DefaultDeviceInfoStruct.ServerBuildTime = DateTime.Now;
+            DefaultDeviceInfoStruct.DeviceServerPort = 0;
+            DefaultDeviceInfoStruct.DeviceServerBuildTime = DateTime.Now;
         }
 
         #endregion
