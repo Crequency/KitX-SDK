@@ -5,6 +5,7 @@
 //  | Author: Dynesshely                            |
 //  =================================================
 
+using KitX.Struct.Producer;
 using KitX.Web.Rules;
 using System.Text;
 using System.Text.Json;
@@ -184,6 +185,8 @@ var regex_version = "^v0*(%re%).0*(%re%).0*(%re%)(.0*%re%)?([-a-z0-9])*$";
 Console.WriteLine("Choose template: ");
 Console.WriteLine("1. PluginStruct");       //  插件结构
 Console.WriteLine("2. LoaderStruct");       //  加载器结构
+Console.WriteLine("3. Produce Default PluginStruct");       //  生成默认插件结构
+Console.WriteLine("4. Produce Default LoaderStruct");       //  生成默认加载器结构
 
 //  黄色提示退出方式
 doInAnotherColor(ConsoleColor.Yellow, new Action(() => Console.WriteLine("Type 'exit' to exit!")));
@@ -269,7 +272,21 @@ while (true)
                 }).Invoke();
                 break;
 
-                #endregion
+            #endregion
+
+            #region Default
+
+            case 3:
+                ask4Dir("Location 2 save: ", "Illegal path!", out string savedir_plugin);
+                ProduceDefault.ProduceDefaultPluginStruct(savedir_plugin);
+                break;
+
+            case 4:
+                ask4Dir("Location 2 save: ", "Illegal path!", out string savedir_loader);
+                ProduceDefault.ProduceDefaultLoaderStruct(savedir_loader);
+                break;
+
+            #endregion
         }
     }
 }
