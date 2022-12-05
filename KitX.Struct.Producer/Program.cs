@@ -1,9 +1,7 @@
-﻿//  =================================================
-//  | Copyright (c) Crequency Studio, 2022-present  |
-//  | All Rights Reserved.                          |
-//  | Date:   2022-09-16                            |
-//  | Author: Dynesshely                            |
-//  =================================================
+﻿// SPDX-FileCopyrightText: 2022 Crequency Studio
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Author: Dynesshely
 
 using KitX.Struct.Producer;
 using KitX.Web.Rules;

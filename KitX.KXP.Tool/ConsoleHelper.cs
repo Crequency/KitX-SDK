@@ -1,4 +1,8 @@
-﻿using System.Text;
+// SPDX-FileCopyrightText: 2022 Crequency Studio
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+using System.Text;
 
 namespace KitX.KXP.Tool
 {
