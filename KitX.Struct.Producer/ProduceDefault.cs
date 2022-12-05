@@ -98,6 +98,10 @@ namespace KitX.Struct.Producer
                 SupportOS = new()
                 {
                     OperatingSystems.Windows, OperatingSystems.MacOS, OperatingSystems.Linux
+                },
+                Tags = new()
+                {
+                    { "LoaderStartupArguments", "" }
                 }
             };
             File.WriteAllText(Path.GetFullPath($"{path}/LoaderStruct.json"),
