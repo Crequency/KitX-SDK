@@ -23,7 +23,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="KitX.Web.Rules" Version="22.4.6276.567" />
+        <PackageReference Include="KitX.Web.Rules" Version="22.4.6351.974" />
     </ItemGroup>
 
     <ItemGroup>
