@@ -89,6 +89,7 @@ namespace KitX.Struct.Producer
             };
             LoaderStruct ls = new()
             {
+                SelfLoader = false,
                 LoaderName = "LoaderName",
                 LoaderVersion = "v1.0.0",
                 LoaderLanguage = "CSharp",

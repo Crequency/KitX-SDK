@@ -181,10 +181,12 @@ var regex_version = "^v0*(%re%).0*(%re%).0*(%re%)(.0*%re%)?([-a-z0-9])*$";
 
 #region 主流程逻辑
 
+string[] launch_args = Environment.GetCommandLineArgs();
+
 //  选择模板
 Console.WriteLine("Choose template: ");
-Console.WriteLine("1. PluginStruct");       //  插件结构
-Console.WriteLine("2. LoaderStruct");       //  加载器结构
+Console.WriteLine("1. PluginStruct (Disabled)");            //  插件结构
+Console.WriteLine("2. LoaderStruct (Disabled)");            //  加载器结构
 Console.WriteLine("3. Produce Default PluginStruct");       //  生成默认插件结构
 Console.WriteLine("4. Produce Default LoaderStruct");       //  生成默认加载器结构
 
@@ -206,39 +208,41 @@ while (true)
             #region PluginStruct
 
             case 1:
-                new Action(async () =>
-                {
-                    PluginStruct pluginStruct = new()
+                if (launch_args.Contains("--enable-pluginstruct-manually-input"))
+                    new Action(async () =>
                     {
-                        Name = check(ask("Name: "), regex_ncu),
-                        Version = check(ask("Version: "), regex_version.Replace("%re%", regex_0t65535)),
-                        AuthorName = check(ask("AuthorName: "), regex_ncu),
-                        PublisherName = check(ask("PublisherName: "), regex_ncu),
-                        AuthorLink = check(ask("AuthorLink: "), regex_link),
-                        PublisherLink = check(ask("PublisherLink: "), regex_link),
-                        SimpleDescription = ask4Dict("SimpleDescription: ", "descr"),
-                        ComplexDescription = ask4Dict("ComplexDescription: ", "descr"),
-                        TotalDescriptionInMarkdown = readDict(ask4Dict("TotalDescriptionInMarkdown: ",
-                            "file path")),
-                        IconInBase64 = File.ReadAllText(
-                            ask4File("Icon in base64 file path: ")),
-                        PublishDate = DateTime.Parse(ask("PublishDate (yyyy-MM-dd): ")),
-                        LastUpdateDate = DateTime.Parse(ask("LastUpdateDate (yyyy-MM-dd): ")),
-                        IsMarketVersion = bool.Parse(ask("IsMarketVersion (true/false): ")),
-                        RootStartupFileName = ask("RootStartupFileName: ")
-                    };
+                        PluginStruct pluginStruct = new()
+                        {
+                            Name = check(ask("Name: "), regex_ncu),
+                            Version = check(ask("Version: "), regex_version.Replace("%re%",
+                                regex_0t65535)),
+                            AuthorName = check(ask("AuthorName: "), regex_ncu),
+                            PublisherName = check(ask("PublisherName: "), regex_ncu),
+                            AuthorLink = check(ask("AuthorLink: "), regex_link),
+                            PublisherLink = check(ask("PublisherLink: "), regex_link),
+                            SimpleDescription = ask4Dict("SimpleDescription: ", "descr"),
+                            ComplexDescription = ask4Dict("ComplexDescription: ", "descr"),
+                            TotalDescriptionInMarkdown = readDict(ask4Dict("TotalDescriptionInMarkdown: ",
+                                "file path")),
+                            IconInBase64 = File.ReadAllText(
+                                ask4File("Icon in base64 file path: ")),
+                            PublishDate = DateTime.Parse(ask("PublishDate (yyyy-MM-dd): ")),
+                            LastUpdateDate = DateTime.Parse(ask("LastUpdateDate (yyyy-MM-dd): ")),
+                            IsMarketVersion = bool.Parse(ask("IsMarketVersion (true/false): ")),
+                            RootStartupFileName = ask("RootStartupFileName: ")
+                        };
 
-                    //  转为 json 格式文本
-                    string jsonConverted = JsonSerializer.Serialize(pluginStruct);
+                        //  转为 json 格式文本
+                        string jsonConverted = JsonSerializer.Serialize(pluginStruct);
 
-                    //  等待输入一个路径
-                    string dirTip = "Input a path to store output file: ", errTip = "Illegal path!";
-                    ask4Dir(dirTip, errTip, out string inputDir);
+                        //  等待输入一个路径
+                        string dirTip = "Input a path to store output file: ", errTip = "Illegal path!";
+                        ask4Dir(dirTip, errTip, out string inputDir);
 
-                    //  将 json 格式文本写入文件
-                    await File.WriteAllTextAsync(Path.GetFullPath($"{inputDir}/PluginStruct.json"),
-                        jsonConverted);
-                }).Invoke();
+                        //  将 json 格式文本写入文件
+                        await File.WriteAllTextAsync(Path.GetFullPath($"{inputDir}/PluginStruct.json"),
+                            jsonConverted);
+                    }).Invoke();
                 break;
 
             #endregion
@@ -246,30 +250,31 @@ while (true)
             #region LoaderStruct
 
             case 2:
-                new Action(async () =>
-                {
-                    LoaderStruct loaderStruct = new()
+                if (launch_args.Contains("--enable-loaderstruct-manually-input"))
+                    new Action(async () =>
                     {
-                        LoaderName = check(ask("LoaderName: "), regex_ncu),
-                        LoaderVersion = check(ask("LoaderVersion: "), regex_version),
-                        LoaderLanguage = check(ask("LoaderLanguage: "), regex_ncu),
-                        LoaderFramework = check(ask("LoaderFramework: "), regex_ncu),
-                        LoaderRunType = (LoaderStruct.RunType)askEnum("LoaderRunType: ",
-                            typeof(LoaderStruct.RunType)),
-                        SupportOS = askList4OperatingSystems()
-                    };
+                        LoaderStruct loaderStruct = new()
+                        {
+                            LoaderName = check(ask("LoaderName: "), regex_ncu),
+                            LoaderVersion = check(ask("LoaderVersion: "), regex_version),
+                            LoaderLanguage = check(ask("LoaderLanguage: "), regex_ncu),
+                            LoaderFramework = check(ask("LoaderFramework: "), regex_ncu),
+                            LoaderRunType = (LoaderStruct.RunType)askEnum("LoaderRunType: ",
+                                typeof(LoaderStruct.RunType)),
+                            SupportOS = askList4OperatingSystems()
+                        };
 
-                    //  转为 json 格式文本
-                    string jsonConverted = JsonSerializer.Serialize(loaderStruct);
+                        //  转为 json 格式文本
+                        string jsonConverted = JsonSerializer.Serialize(loaderStruct);
 
-                    //  等待输入一个路径
-                    string dirTip = "Input a path to store output file: ", errTip = "Illegal path!";
-                    ask4Dir(dirTip, errTip, out string inputDir);
+                        //  等待输入一个路径
+                        string dirTip = "Input a path to store output file: ", errTip = "Illegal path!";
+                        ask4Dir(dirTip, errTip, out string inputDir);
 
-                    //  将 json 格式文本写入文件
-                    await File.WriteAllTextAsync(Path.GetFullPath($"{inputDir}/LoaderStruct.json"),
-                        jsonConverted);
-                }).Invoke();
+                        //  将 json 格式文本写入文件
+                        await File.WriteAllTextAsync(Path.GetFullPath($"{inputDir}/LoaderStruct.json"),
+                            jsonConverted);
+                    }).Invoke();
                 break;
 
             #endregion
@@ -286,7 +291,7 @@ while (true)
                 ProduceDefault.ProduceDefaultLoaderStruct(savedir_loader);
                 break;
 
-            #endregion
+                #endregion
         }
     }
 }
