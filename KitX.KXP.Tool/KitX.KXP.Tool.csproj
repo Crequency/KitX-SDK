@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 <!--
 SPDX-FileCopyrightText: 2022 Crequency Studio
 
@@ -18,7 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <PackAsTool>True</PackAsTool>
         <ToolCommandName>kxper</ToolCommandName>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>1.0.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-07-16"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
+        <Version>1.1.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
         <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Crequency/KitX/</RepositoryUrl>
     </PropertyGroup>
