@@ -9,8 +9,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <BaseOutputPath>..\..\KitX Build\Tools\Struct\</BaseOutputPath>
-        <BaseIntermediateOutputPath>..\..\KitX Build\Temp\Tools\Struct\</BaseIntermediateOutputPath>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <Version>1.1.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
         <Authors>Dynesshely</Authors>

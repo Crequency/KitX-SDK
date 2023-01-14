@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 <!--
 SPDX-FileCopyrightText: 2022 Crequency Studio
 
@@ -9,8 +9,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <BaseOutputPath>..\..\KitX Build\Tools\KXP\</BaseOutputPath>
-        <BaseIntermediateOutputPath>..\..\KitX Build\Temp\Tools\KXP\</BaseIntermediateOutputPath>
     </PropertyGroup>
 
 </Project>
