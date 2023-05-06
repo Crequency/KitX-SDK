@@ -1,141 +1,85 @@
-﻿// SPDX-FileCopyrightText: 2022 Crequency Studio
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// Author: Dynesshely
-
+﻿using CommandLine;
+using Common.BasicHelper.Utils.Extensions;
 using KitX.KXP.Tool;
 using System.Text;
 using Encoder = KitX.KXP.Helper.Encoder;
 
-Copyrighter.WriteCopyrightInfo();
-ConsoleHelper.WriteSeparater();
-
-var basicAskForDir = (string tip, string err, out string answer) =>
-{
-    string? input = null;
-    while (input == null)
+Parser.Default.ParseArguments<Options, PackOptions>(args)
+    .WithParsed<PackOptions>(options =>
     {
-        Console.Write(tip);
-        input = Console.ReadLine();
-        if (!Directory.Exists(input))
+        options.SourcePath ??= "./".GetFullPath();
+        options.SourcePath = options.SourcePath.GetFullPath();
+        options.OutputPath = options.OutputPath.GetFullPath();
+        options.OutputFileName ??= new DirectoryInfo(options.SourcePath).Name ?? "Plugin";
+        options.LoaderStructPath ??= $"{options.SourcePath}/LoaderStruct.json".GetFullPath();
+        options.LoaderStructPath = options.LoaderStructPath.GetFullPath();
+        options.PluginStructPath ??= $"{options.SourcePath}/PluginStruct.json".GetFullPath();
+        options.PluginStructPath = options.PluginStructPath.GetFullPath();
+        options.IgnoredFileExtensions ??= new List<string>();
+
+        if (options.Verbose)
         {
-            ConsoleHelper.DoInAnotherColor(ConsoleColor.Red, new(() =>
-            {
-                Console.WriteLine(err);
-            }));
-            Environment.Exit(1);
+            var ext_sb = new StringBuilder();
+            foreach (var item in options.IgnoredFileExtensions)
+                ext_sb.Append($"{item}, ");
+            var ignoredFileExtensions = ext_sb
+                .ToString()[..(ext_sb.Length - 2 > 0 ? ext_sb.Length - 2 : 0)];
+
+            Console.WriteLine(
+                $"""
+                {nameof(options.SourcePath)}: {options.SourcePath}
+                {nameof(options.OutputPath)}: {options.OutputPath}
+                {nameof(options.OutputFileName)}: {options.OutputFileName}
+                {nameof(options.PluginStructPath)}: {options.PluginStructPath}
+                {nameof(options.LoaderStructPath)}: {options.LoaderStructPath}
+                {nameof(options.IgnoredFileExtensions)}: {ignoredFileExtensions}
+                """
+            );
         }
-    }
-    answer = input;
-};
 
-var basicAskForString = (string tip, out string answer) =>
-{
-    string? input = null;
-    while (input == null)
-    {
-        Console.Write(tip);
-        input = Console.ReadLine();
-    }
-    answer = input;
-};
+        var files = new List<string>();
+        var sb = new StringBuilder();
+        var directories = new Queue<string>();
 
-var basicIfWithAction = (bool addition,
-    ConsoleColor onec, ConsoleColor zeroc, Action one, Action zero) =>
-{
-    ConsoleColor nowc = Console.ForegroundColor;
-    if (addition)
-    {
-        Console.ForegroundColor = onec;
-        one();
-    }
-    else
-    {
-        Console.ForegroundColor = zeroc;
-        zero();
-    }
-    Console.ForegroundColor = nowc;
-};
-
-string? path = null, savepath = null, savefilename = null;
-string noPathTip = "This path not exist!";
-basicAskForDir("Input path of files to include: ", noPathTip, out path);
-basicAskForDir("Input path to save output: ", noPathTip, out savepath);
-basicAskForString("Input a name for output file: ", out savefilename);
-
-string? loaderStruct = null, pluginStruct = null;
-string loaderStructFileName = "LoaderStruct.json", pluginStructFileName = "PluginStruct.json";
-if (File.Exists(Path.GetFullPath($"{path}/{loaderStructFileName}")))
-    loaderStruct = File.ReadAllText($"{path}/{loaderStructFileName}");
-else
-{
-    ConsoleHelper.DoInAnotherColor(ConsoleColor.Yellow, new Action(() =>
-    {
-        Console.Write("Miss 'LoaderStruct.json', input path manually: ");
-    }));
-    string? inpath = Console.ReadLine();
-    if (inpath != null)
-    {
-        basicIfWithAction(File.Exists(inpath), ConsoleColor.White, ConsoleColor.Red, new Action(() =>
+        var getAllFiles = (string path) =>
         {
-            loaderStruct = File.ReadAllText(inpath);
-        }), new Action(() =>
-        {
-            Console.WriteLine("No this file!");
-            Environment.Exit(1);
-        }));
-    }
-}
-if (File.Exists(Path.GetFullPath($"{path}/{pluginStructFileName}")))
-    pluginStruct = File.ReadAllText($"{path}/{pluginStructFileName}");
-else
-{
-    ConsoleHelper.DoInAnotherColor(ConsoleColor.Yellow, new Action(() =>
-    {
-        Console.Write("Miss 'PluginStruct.json', input path manually: ");
-    }));
-    string? inpath = Console.ReadLine();
-    if (inpath != null)
-    {
-        basicIfWithAction(File.Exists(inpath), ConsoleColor.White, ConsoleColor.Red, new Action(() =>
-        {
-            pluginStruct = File.ReadAllText(inpath);
-        }), new Action(() =>
-        {
-            Console.WriteLine("No this file!");
-            Environment.Exit(1);
-        }));
-    }
-}
+            var info = new DirectoryInfo(path);
+            foreach (var item in info.GetFiles())
+            {
+                if (options.IgnoredFileExtensions.Contains(Path.GetExtension(item.FullName)))
+                    sb.AppendLine($"Ignored file: {item.FullName}");
+                else
+                {
+                    files.Add(item.FullName);
+                    sb.AppendLine($"Found file: {item.FullName}");
+                }
+            }
+            foreach (var item in info.GetDirectories())
+                directories.Enqueue(item.FullName);
+        };
 
-List<string> files = new();
-StringBuilder sb = new();
+        getAllFiles(options.SourcePath);
 
-Queue<string> dirs = new();
+        while (directories.Count > 0)
+            getAllFiles(directories.Dequeue());
 
-var forFiles = (string path, ref List<string> files) =>
-{
-    DirectoryInfo info = new(path);
-    foreach (var item in info.GetFiles())
-    {
-        files.Add(item.FullName);
-        sb.AppendLine($"Found file: {item.FullName}");
-    }
-    foreach (var item in info.GetDirectories())
-        dirs.Enqueue(item.FullName);
-};
+        if (options.Verbose)
+            Console.WriteLine(sb.ToString());
 
-forFiles(path, ref files);
+        var encoder = new Encoder(
+            files,
+            File.ReadAllText(options.LoaderStructPath),
+            File.ReadAllText(options.PluginStructPath),
+            new()
+            {
+                Verbose = options.Verbose
+            }
+        );
 
-while (dirs.Count > 0)
-    forFiles(dirs.Dequeue(), ref files);
+        encoder.Encode(
+            options.SourcePath,
+            options.OutputPath,
+            options.OutputFileName
+        );
 
-ConsoleHelper.DoInAnotherColor(ConsoleColor.Blue, new(() =>
-{
-    Console.WriteLine(sb.ToString());
-}));
-
-Encoder encoder = new(files, loaderStruct, pluginStruct);
-encoder.Encode(path, savepath, savefilename);
-
-
+    });
