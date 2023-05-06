@@ -6,14 +6,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <Version>1.1.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
+        <Version>1.2.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
         <Authors>Dynesshely</Authors>
         <Company>Crequency</Company>
         <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Crequency/KitX/</RepositoryUrl>
         <PackageIcon>KitX-Background-ani.png</PackageIcon>
         <PackAsTool>True</PackAsTool>
-        <ToolCommandName>ksmake</ToolCommandName>
+        <ToolCommandName>ksmaker</ToolCommandName>
     </PropertyGroup>
 
     <ItemGroup>
