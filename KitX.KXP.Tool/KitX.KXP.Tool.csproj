@@ -12,9 +12,13 @@
         <PackAsTool>True</PackAsTool>
         <ToolCommandName>kxpmaker</ToolCommandName>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>1.2.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
         <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Crequency/KitX/</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>kitx;kitx-tool;kxp;maker;packer;kxpmaker</PackageTags>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
+        <Version>1.2.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,6 +33,10 @@
 
     <ItemGroup>
         <None Update="KitX-Background-ani.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Update="README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
