@@ -5,15 +5,27 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <Version>1.2.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
         <Authors>Dynesshely</Authors>
         <Company>Crequency</Company>
-        <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Crequency/KitX/</RepositoryUrl>
         <PackageIcon>KitX-Background-ani.png</PackageIcon>
         <PackAsTool>True</PackAsTool>
         <ToolCommandName>ksmaker</ToolCommandName>
+        <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+        <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Crequency/KitX-Tools/</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>kitx;kitx-tool;ks;maker;generater;ksmaker</PackageTags>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
+        <Version>1.2.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2005-06-06"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,6 +41,10 @@
         <None Update="KitX-Background-ani.png">
             <PackagePath>\</PackagePath>
             <Pack>True</Pack>
+        </None>
+        <None Update="README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
         </None>
     </ItemGroup>
 
