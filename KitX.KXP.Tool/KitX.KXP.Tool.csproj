@@ -30,7 +30,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="Common.BasicHelper" Version="1.2.6543.304" />
+        <PackageReference Include="Common.BasicHelper" Version="1.2.6546.627" />
         <PackageReference Include="KitX.KXP.Helper" Version="22.4.6351.975" />
     </ItemGroup>
 
