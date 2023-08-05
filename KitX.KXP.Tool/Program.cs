@@ -2,7 +2,7 @@
 using Common.BasicHelper.Utils.Extensions;
 using KitX.KXP.Tool;
 using System.Text;
-using Encoder = KitX.File.Formats.KXP.Encoder;
+using Encoder = KitX.Formats.KXP.Encoder;
 
 Parser.Default.ParseArguments<Options, PackOptions>(args)
     .WithParsed<PackOptions>(options =>

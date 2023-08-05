@@ -34,7 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\KitX Standard\KitX File Formats\KitX.File.Formats.KXP\KitX.File.Formats.KXP.csproj" />
+      <ProjectReference Include="..\..\KitX Standard\KitX File Formats\KitX.Formats.KXP\KitX.Formats.KXP.csproj" />
     </ItemGroup>
 
     <ItemGroup>
