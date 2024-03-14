@@ -1,6 +1,3 @@
-[submodule "Reference/XamlMultiLanguageEditor"]
-	path = Reference/XamlMultiLanguageEditor
-	url = git@github.com:Dynesshely/XamlMultiLanguageEditor.git
 [submodule "Cheese"]
 	path = Cheese
 	url = git@github.com:Crequency/Cheese.git
