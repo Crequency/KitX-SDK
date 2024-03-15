@@ -1,6 +1,3 @@
-[submodule "Cheese"]
-	path = Cheese
-	url = git@github.com:Crequency/Cheese.git
 [submodule "KitX Loaders"]
 	path = KitX Loaders
 	url = git@github.com:Crequency/KitX-Loaders.git
