@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace SyncCodes;
 
@@ -9,7 +10,7 @@ public class FileItem
 
     public string Hash { get; }
 
-    public bool FileLoaded { get; set; }
+    [JsonIgnore] public bool FileLoaded { get; set; }
 
     public FileItem(string path)
     {

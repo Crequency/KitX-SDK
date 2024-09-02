@@ -11,6 +11,12 @@ var workBase = Directory.GetCurrentDirectory();
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
+var jsonSerializerOptions = new JsonSerializerOptions()
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    WriteIndented = true,
+};
+
 Parser.Default.ParseArguments<CommandLineOptions>(args)
     .WithParsed(options =>
     {
@@ -121,7 +127,8 @@ void RunClient(Context context)
         }
 
         var catalog = JsonSerializer.Deserialize<List<FileItem>>(
-            await catalogResponse.Content.ReadAsStringAsync()
+            await catalogResponse.Content.ReadAsStringAsync(),
+            jsonSerializerOptions
         )!;
 
         var localCatalog = context.GetFiles();
@@ -142,8 +149,8 @@ void RunClient(Context context)
         //         .Select(c => new { Original = c.Original, Difference = c.New })
         //     ;
 
-        app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch));
-        app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete));
+        app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch, jsonSerializerOptions));
+        app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete, jsonSerializerOptions));
         // app.Logger.LogDebug("Need to update: {json}", JsonSerializer.Serialize(needToUpdate));
     };
     timer.Start();
