@@ -5,9 +5,9 @@ namespace SyncCodes;
 
 public class FileItem
 {
-    public string Path { get; set; }
+    public string Path { get; }
 
-    public string Hash { get; set; }
+    public string Hash { get; }
 
     public bool FileLoaded { get; set; }
 
@@ -31,4 +31,8 @@ public class FileItem
             FileLoaded = false;
         }
     }
+
+    public override bool Equals(object? obj) => obj is FileItem item && FileLoaded && item.FileLoaded && Hash.Equals(item.Hash);
+
+    public override int GetHashCode() => Convert.FromBase64String(Hash).GetHashCode();
 }

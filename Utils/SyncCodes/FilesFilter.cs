@@ -38,7 +38,7 @@ public class FilesFilter
 
         Policy
             .Handle<Exception>()
-            .Retry(3, (exception, retryCount, context) =>
+            .Retry(3, (exception, retryCount) =>
             {
                 _logger.LogError(
                     "Error loading sync ignore file: {message}, try times: {retryCount}",
