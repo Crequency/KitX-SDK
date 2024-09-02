@@ -31,8 +31,18 @@ public class FileItem
             FileLoaded = false;
         }
     }
+}
 
-    public override bool Equals(object? obj) => obj is FileItem item && FileLoaded && item.FileLoaded && Hash.Equals(item.Hash);
+public class FileItemExistenceComparer : IEqualityComparer<FileItem>
+{
+    public bool Equals(FileItem? x, FileItem? y) => x is not null && y is not null && x.Path.Equals(y.Path);
 
-    public override int GetHashCode() => Convert.FromBase64String(Hash).GetHashCode();
+    public int GetHashCode(FileItem obj) => obj.GetHashCode();
+}
+
+public class FileItemComparer : IEqualityComparer<FileItem>
+{
+    public bool Equals(FileItem? x, FileItem? y) => x is not null && y is not null && x.FileLoaded && y.FileLoaded && x.Path.Equals(y.Path) && x.Hash.Equals(y.Hash);
+
+    public int GetHashCode(FileItem obj) => obj.GetHashCode();
 }

@@ -126,25 +126,25 @@ void RunClient(Context context)
 
         var localCatalog = context.GetFiles();
 
-        var needToFetch = catalog.Except(localCatalog);
-        var needToDelete = localCatalog.Except(catalog);
-        var needToUpdate = localCatalog.GroupJoin(
-                    catalog,
-                    x => x,
-                    y => y,
-                    (x, y) => new { Original = x, New = y }
-                )
-                .SelectMany(
-                    c => c.New.DefaultIfEmpty(),
-                    (x, y) => new { x.Original, New = y }
-                )
-                .Where(c => c.Original.Hash.Equals(c.New!.Hash) == false)
-                .Select(c => new { Original = c.Original, Difference = c.New })
-            ;
+        var needToFetch = catalog.Except(localCatalog, new FileItemExistenceComparer());
+        var needToDelete = localCatalog.Except(catalog, new FileItemExistenceComparer());
+        // var needToUpdate = localCatalog.GroupJoin(
+        //             catalog,
+        //             x => x,
+        //             y => y,
+        //             (x, y) => new { Original = x, New = y }
+        //         )
+        //         .SelectMany(
+        //             c => c.New.DefaultIfEmpty(),
+        //             (x, y) => new { x.Original, New = y }
+        //         )
+        //         .Where(c => c.Original.Hash.Equals(c.New!.Hash) == false)
+        //         .Select(c => new { Original = c.Original, Difference = c.New })
+        //     ;
 
-        app.Logger.LogDebug("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch));
-        app.Logger.LogDebug("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete));
-        app.Logger.LogDebug("Need to update: {json}", JsonSerializer.Serialize(needToUpdate));
+        app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch));
+        app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete));
+        // app.Logger.LogDebug("Need to update: {json}", JsonSerializer.Serialize(needToUpdate));
     };
     timer.Start();
 
