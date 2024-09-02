@@ -1,0 +1,6 @@
+# Project build process files
+bin/
+obj/
+
+# IDE files
+.idea/
