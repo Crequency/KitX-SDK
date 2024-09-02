@@ -2,13 +2,13 @@ namespace SyncCodes;
 
 public class Context
 {
-    public string WorkBase { get; set; }
+    public string WorkBase { get; }
 
-    public List<FileItem> Files { get; set; } = [];
+    public List<FileItem> Files { get; } = [];
+
+    public FilesFilter Filter { get; }
 
     private FileSystemWatcher? _watcher;
-
-    private FilesFilter _filter;
 
     private readonly ILogger _logger;
 
@@ -16,7 +16,7 @@ public class Context
     {
         WorkBase = workBase;
 
-        _filter = new FilesFilter(workBase, logger);
+        Filter = new(workBase, logger);
 
         _logger = logger;
 
@@ -38,7 +38,7 @@ public class Context
             if (Path.GetRelativePath(WorkBase, e.FullPath).Equals(".sync-ignore"))
             {
                 _logger.LogInformation("Sync-ignore file changed, refreshing config ...");
-                _filter.LoadIgnoreConfig();
+                Filter.LoadIgnoreConfig();
                 RefreshFiles();
             }
 
@@ -62,7 +62,7 @@ public class Context
         Files.Clear();
         Files.AddRange(
             folder.GetFiles()
-                .Where(f => _filter.ShouldIgnore(f.FullName) == false)
+                .Where(f => Filter.ShouldIgnore(f.FullName) == false)
                 .Select(
                     f => new FileItem(
                         Path.GetRelativePath(WorkBase, f.FullName)
@@ -79,7 +79,7 @@ public class Context
                 foldersToSearch.Enqueue(dir);
             Files.AddRange(
                 subFolder.GetFiles()
-                    .Where(f => _filter.ShouldIgnore(f.FullName) == false)
+                    .Where(f => Filter.ShouldIgnore(f.FullName) == false)
                     .Select(
                         f => new FileItem(Path.GetRelativePath(WorkBase, f.FullName))
                     )

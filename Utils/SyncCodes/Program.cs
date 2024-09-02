@@ -46,21 +46,31 @@ void RunServer(Context context)
     context.InitializeFileSystemWatcher(
         (e) =>
         {
-            app.Logger.LogInformation("FileSystem Modified: {message}", e.ToString());
+            if (context.Filter.ShouldIgnore(e.FullPath) == false)
+                app.Logger.LogInformation(
+                    "FileSystem Modified: {name}, {changeType} | {path}, [{time}]",
+                    e.Name,
+                    e.ChangeType,
+                    Path.GetRelativePath(workBase, e.FullPath),
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                );
             context.RefreshFiles();
         }
     );
 
     app.MapGet(
         "/",
-        () => $"""
-               SyncCodes Util for KitX Project
-               Development usage only (Server Mode)
-
-               * Server Address: {app.Urls.First()}
-
-               Now is `{DateTime.Now:yyyy-MM-dd HH:mm:ss}`
-               """
+        () => Results.Content(
+            HomePageHtml(
+                subTitle: "Development usage only (Server Mode)",
+                content: $"""
+                          <p class="mt-4 text-xl text-gray-500">🌏 Server Address: <a href="{app.Urls.First()}" target="_blank" class="font-semibold text-indigo-600 underline">{app.Urls.First()}</a></p>
+                          <p class="mt-4 text-xl text-gray-500">📂 Work Base Path: <a href="file:///{workBase}" target="_blank" class="font-semibold text-indigo-600 underline">{workBase}</a></p>
+                          """
+            ),
+            "text/html",
+            Encoding.UTF8
+        )
     );
 
     app.MapGet(
@@ -106,6 +116,7 @@ void RunClient(Context context)
         var catalogResponse = await client.GetAsync(catalogApi);
         if (!catalogResponse.IsSuccessStatusCode)
         {
+            app.Logger.LogError("Failed to fetch catalog: {statusCode}", catalogResponse.StatusCode);
             return;
         }
 
@@ -139,18 +150,41 @@ void RunClient(Context context)
 
     app.MapGet(
         "/",
-        () => $"""
-               SyncCodes Util for KitX Project
-               Development usage only (Client Mode)
-
-               * Target Server Address: {address}
-
-               Now is `{DateTime.Now:yyyy-MM-dd HH:mm:ss}`
-               """
+        () => HomePageHtml(
+            subTitle: "Development usage only (Client Mode)",
+            content: $"""
+                      <p class="mt-4 text-xl text-gray-500">🌏 Target Server Address: <a href="{address}" target="_blank" class="font-semibold text-indigo-600 underline">{address}</a></p>
+                      """
+        )
     );
 
     app.Run();
 }
+
+string HomePageHtml(
+    string title = "SyncCodes Util for KitX Project",
+    string subTitle = "",
+    string content = ""
+) => $"""
+      <!DOCTYPE html>
+      <html>
+          <head>
+              <script src="https://cdn.tailwindcss.com"></script>
+          </head>
+          <body style="margin: 30px; font-family: Consolas, monospace;">
+              <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">{title}</h1>
+              <h3 class="mt-4 text-xl text-gray-500">{subTitle}</h3>
+
+              <br><hr>
+
+              {content}
+
+              <br>
+
+              <p>* Now is {DateTime.Now:yyyy-MM-dd HH:mm:ss}</p>
+          </body>
+      </html>
+      """;
 
 partial class Program
 {
