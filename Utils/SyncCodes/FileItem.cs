@@ -36,7 +36,7 @@ public class FileItem
 
 public class FileItemExistenceComparer : IEqualityComparer<FileItem>
 {
-    public bool Equals(FileItem? x, FileItem? y) => x is not null && y is not null && x.Path.Equals(y.Path);
+    public bool Equals(FileItem? x, FileItem? y) => x?.Path?.Equals(y?.Path) ?? false;
 
     public int GetHashCode(FileItem obj) => obj.GetHashCode();
 }

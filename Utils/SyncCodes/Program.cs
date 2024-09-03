@@ -81,7 +81,7 @@ void RunServer(Context context)
 
     app.MapGet(
         "/catalog",
-        context.GetFiles
+        () => context.GetFiles().Where(f => f.FileLoaded)
     );
 
     app.MapGet(
@@ -122,7 +122,11 @@ void RunClient(Context context)
         var catalogResponse = await client.GetAsync(catalogApi);
         if (!catalogResponse.IsSuccessStatusCode)
         {
-            app.Logger.LogError("Failed to fetch catalog: {statusCode}", catalogResponse.StatusCode);
+            app.Logger.LogError(
+                "[{time}] Failed to fetch catalog: {statusCode}",
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                catalogResponse.StatusCode
+            );
             return;
         }
 
@@ -133,25 +137,21 @@ void RunClient(Context context)
 
         var localCatalog = context.GetFiles();
 
-        var needToFetch = catalog.Except(localCatalog, new FileItemExistenceComparer());
-        var needToDelete = localCatalog.Except(catalog, new FileItemExistenceComparer());
-        // var needToUpdate = localCatalog.GroupJoin(
-        //             catalog,
-        //             x => x,
-        //             y => y,
-        //             (x, y) => new { Original = x, New = y }
-        //         )
-        //         .SelectMany(
-        //             c => c.New.DefaultIfEmpty(),
-        //             (x, y) => new { x.Original, New = y }
-        //         )
-        //         .Where(c => c.Original.Hash.Equals(c.New!.Hash) == false)
-        //         .Select(c => new { Original = c.Original, Difference = c.New })
-        //     ;
+        var differences = catalog.Concat(localCatalog).GroupBy(
+            f => f.Path,
+            f => f.Hash,
+            (path, hashes) => new
+            {
+                Path = path,
+                Count = hashes.Count(),
+                LocalHash = localCatalog.FirstOrDefault(f => f.Path.Equals(path))?.Hash,
+                RemoteHash = catalog.FirstOrDefault(f => f.Path.Equals(path))?.Hash,
+            }
+        );
 
-        app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch, jsonSerializerOptions));
-        app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete, jsonSerializerOptions));
-        // app.Logger.LogDebug("Need to update: {json}", JsonSerializer.Serialize(needToUpdate));
+        // app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch, jsonSerializerOptions));
+        // app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete, jsonSerializerOptions));
+        app.Logger.LogDebug("Differences: {json}", JsonSerializer.Serialize(differences));
     };
     timer.Start();
 
