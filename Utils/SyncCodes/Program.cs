@@ -2,8 +2,10 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CommandLine;
+using Polly;
 using Spectre.Console;
 using SyncCodes;
+using Context = SyncCodes.Context;
 using Timer = System.Timers.Timer;
 
 var workBase = Directory.GetCurrentDirectory();
@@ -30,6 +32,21 @@ Parser.Default.ParseArguments<CommandLineOptions>(args)
 
         var context = new Context(workBase, app.Logger);
 
+        context.InitializeFileSystemWatcher(
+            (e) =>
+            {
+                if (context.Filter.ShouldIgnore(e.FullPath) == false)
+                    app.Logger.LogInformation(
+                        "[{time}] FileSystem Modified: {name}, {changeType} | {path}",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        e.Name,
+                        e.ChangeType,
+                        Path.GetRelativePath(workBase, e.FullPath)
+                    );
+                context.RefreshFiles();
+            }
+        );
+
         switch (options.Job)
         {
             case Jobs.FetchCodes:
@@ -49,21 +66,6 @@ return;
 
 void RunServer(Context context)
 {
-    context.InitializeFileSystemWatcher(
-        (e) =>
-        {
-            if (context.Filter.ShouldIgnore(e.FullPath) == false)
-                app.Logger.LogInformation(
-                    "FileSystem Modified: {name}, {changeType} | {path}, [{time}]",
-                    e.Name,
-                    e.ChangeType,
-                    Path.GetRelativePath(workBase, e.FullPath),
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                );
-            context.RefreshFiles();
-        }
-    );
-
     app.MapGet(
         "/",
         () => Results.Content(
@@ -98,8 +100,6 @@ void RunServer(Context context)
 
 void RunClient(Context context)
 {
-    context.InitializeFileSystemWatcher((_) => context.RefreshFiles());
-
     var address = AnsiConsole.Prompt(new TextPrompt<string>("Please input the server address: ")
     {
         Validator = (s) => ServerAddressRegex().IsMatch(s)
@@ -138,20 +138,32 @@ void RunClient(Context context)
         var localCatalog = context.GetFiles();
 
         var differences = catalog.Concat(localCatalog).GroupBy(
-            f => f.Path,
+            f => f.Path.RelatedTo(workBase),
             f => f.Hash,
             (path, hashes) => new
             {
                 Path = path,
                 Count = hashes.Count(),
-                LocalHash = localCatalog.FirstOrDefault(f => f.Path.Equals(path))?.Hash,
-                RemoteHash = catalog.FirstOrDefault(f => f.Path.Equals(path))?.Hash,
+                LocalHash = localCatalog.FirstOrDefault(f => f.Path.RelatedTo(workBase).Equals(path))?.Hash,
+                RemoteHash = catalog.FirstOrDefault(f => f.Path.RelatedTo(workBase).Equals(path))?.Hash,
             }
         );
 
-        // app.Logger.LogInformation("Need to fetch: {json}", JsonSerializer.Serialize(needToFetch, jsonSerializerOptions));
-        // app.Logger.LogInformation("Need to delete:: {json}", JsonSerializer.Serialize(needToDelete, jsonSerializerOptions));
-        app.Logger.LogDebug("Differences: {json}", JsonSerializer.Serialize(differences));
+        app.Logger.LogInformation(
+            "Remote: {json1}\n      Local: {json2}\n      Differences: {json3}",
+            JsonSerializer.Serialize(
+                differences.Where(c => c.LocalHash is null && c.RemoteHash is not null),
+                jsonSerializerOptions
+            ),
+            JsonSerializer.Serialize(
+                differences.Where(c => c.RemoteHash is null && c.LocalHash is not null),
+                jsonSerializerOptions
+            ),
+            JsonSerializer.Serialize(
+                differences.Where(c => c.LocalHash is not null && c.RemoteHash is not null && !c.LocalHash.Equals(c.RemoteHash)),
+                jsonSerializerOptions
+            )
+        );
     };
     timer.Start();
 
@@ -163,6 +175,11 @@ void RunClient(Context context)
                       <p class="mt-4 text-xl text-gray-500">🌏 Target Server Address: <a href="{address}" target="_blank" class="font-semibold text-indigo-600 underline">{address}</a></p>
                       """
         )
+    );
+
+    app.MapGet(
+        "/catalog",
+        () => context.GetFiles().Where(f => f.FileLoaded)
     );
 
     app.Run();
@@ -197,4 +214,9 @@ partial class Program
 {
     [GeneratedRegex(@"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)|(\[[0-9A-Fa-f:.]+\])|([a-zA-Z0-9.-]+)(:\d+)?")]
     private static partial Regex ServerAddressRegex();
+}
+
+public static class Extensions
+{
+    public static string RelatedTo(this string path, string workBase) => Path.GetRelativePath(workBase, Path.Combine(workBase, path));
 }

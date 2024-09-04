@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
+using Polly;
 
 namespace SyncCodes;
 
@@ -8,29 +9,35 @@ public class FileItem
 {
     public string Path { get; }
 
-    public string Hash { get; }
+    public string Hash { get; set; }
 
     [JsonIgnore] public bool FileLoaded { get; set; }
 
-    public FileItem(string path)
+    private readonly ILogger _logger;
+
+    public FileItem(string path, ILogger logger)
     {
         Path = path;
 
+        _logger = logger;
+
         // Avoid file not exists exception, sometimes IDE creates temporary files
-        try
+        Policy.Handle<Exception>().Retry(3, (exception, retryCount) =>
+        {
+            _logger.LogError(
+                "Error loading sync ignore file: {message}, try times: {retryCount}",
+                exception.Message,
+                retryCount
+            );
+
+        }).Execute(() =>
         {
             var content = File.ReadAllText(Path);
             var hash = SHA256.HashData(Encoding.UTF8.GetBytes(content));
             Hash = Convert.ToBase64String(hash);
 
             FileLoaded = true;
-        }
-        catch (Exception e)
-        {
-            Hash = string.Empty;
-
-            FileLoaded = false;
-        }
+        });
     }
 }
 
