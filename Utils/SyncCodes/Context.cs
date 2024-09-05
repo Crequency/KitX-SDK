@@ -75,11 +75,10 @@ public class Context
                     .Where(f => Filter.ShouldIgnore(f.FullName) == false)
                     .Select(
                         f => new FileItem(
-                            Path.GetRelativePath(WorkBase, f.FullName),
-                            _logger
-                        )
+                            Path.GetRelativePath(WorkBase, f.FullName)
+                        ).Read(_logger)
                     )
-                    .Where(f => f.FileLoaded)
+                    .Where(f => f.Hash is not null)
             );
 
             var foldersToSearch = new Queue<DirectoryInfo>(folder.GetDirectories());
@@ -93,11 +92,10 @@ public class Context
                         .Where(f => Filter.ShouldIgnore(f.FullName) == false)
                         .Select(
                             f => new FileItem(
-                                Path.GetRelativePath(WorkBase, f.FullName),
-                                _logger
-                            )
+                                Path.GetRelativePath(WorkBase, f.FullName)
+                            ).Read(_logger)
                         )
-                        .Where(f => f.FileLoaded)
+                        .Where(f => f.Hash is not null)
                 );
             }
         }

@@ -83,7 +83,7 @@ void RunServer(Context context)
 
     app.MapGet(
         "/catalog",
-        () => context.GetFiles().Where(f => f.FileLoaded)
+        () => context.GetFiles().Where(f => f.Hash is not null)
     );
 
     app.MapGet(
@@ -179,7 +179,7 @@ void RunClient(Context context)
 
     app.MapGet(
         "/catalog",
-        () => context.GetFiles().Where(f => f.FileLoaded)
+        () => context.GetFiles().Where(f => f.Hash is not null)
     );
 
     app.Run();
