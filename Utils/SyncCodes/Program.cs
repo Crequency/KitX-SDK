@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CommandLine;
-using Polly;
 using Spectre.Console;
 using SyncCodes;
 using Context = SyncCodes.Context;
@@ -141,9 +140,6 @@ void RunClient(Context context)
 
         var localCatalog = context.GetFiles();
 
-        // app.Logger.LogInformation("Remote catalog: {json}", JsonSerializer.Serialize(catalog, jsonSerializerOptions));
-        // app.Logger.LogInformation("Local catalog: {json}", JsonSerializer.Serialize(localCatalog, jsonSerializerOptions));
-
         var differences = catalog.Concat(localCatalog).GroupBy(
             f => f.Path.RelatedTo(workBase),
             f => f.Hash,
@@ -156,20 +152,9 @@ void RunClient(Context context)
             }
         );
 
-        // var toDelete = differences.Where(c => c.LocalHash is not null && c.RemoteHash is null).ToList();
-        // var toDownload = differences.Where(c => c.LocalHash is null && c.RemoteHash is not null).ToList();
-        // var toUpdate = differences.Where(c => c.LocalHash is not null && c.RemoteHash is not null && !c.LocalHash.Equals(c.RemoteHash));
-        //
-        // app.Logger.LogInformation(
-        //     "Remote: {json1}\n      Local: {json2}\n      Differences: {json3}",
-        //     JsonSerializer.Serialize(toDelete, jsonSerializerOptions),
-        //     JsonSerializer.Serialize(toDownload, jsonSerializerOptions),
-        //     JsonSerializer.Serialize(toUpdate, jsonSerializerOptions)
-        // );
-
         foreach (var comparison in differences)
         {
-            if (comparison.LocalHash is not null && comparison.RemoteHash is not null)
+            if (comparison.LocalHash is not null && comparison.RemoteHash is null)
             {
                 var filePath = Path.Combine(workBase, comparison.Path);
                 if (!File.Exists(filePath))
@@ -212,11 +197,16 @@ void RunClient(Context context)
 
     app.MapGet(
         "/",
-        () => HomePageHtml(
-            subTitle: "Development usage only (Client Mode)",
-            content: $"""
-                      <p class="mt-4 text-xl text-gray-500">🌏 Target Server Address: <a href="{address}" target="_blank" class="font-semibold text-indigo-600 underline">{address}</a></p>
-                      """
+        () => Results.Content(
+            HomePageHtml(
+                subTitle: "Development usage only (Client Mode)",
+                content: $"""
+                          <p class="mt-4 text-xl text-gray-500">🌏 Target Server Address: <a href="{address}" target="_blank" class="font-semibold text-indigo-600 underline">{address}</a></p>
+                          <p class="mt-4 text-xl text-gray-500">📂 Work Base Path: <a href="file:///{workBase}" target="_blank" class="font-semibold text-indigo-600 underline">{workBase}</a></p>
+                          """
+            ),
+            "text/html",
+            Encoding.UTF8
         )
     );
 
