@@ -65,6 +65,13 @@ return;
 
 void RunServer(Context context)
 {
+    var timer = new Timer(3000)
+    {
+        AutoReset = true,
+    };
+    timer.Elapsed += (_, _) => context.RefreshFiles();
+    timer.Start();
+
     app.MapGet(
         "/",
         () => Results.Content(
@@ -177,7 +184,10 @@ void RunClient(Context context)
             else
             {
                 var filePath = Path.Combine(workBase, comparison.Path);
-                var fileContentResponse = await client.GetAsync(fileApi + Convert.ToBase64String(Encoding.UTF8.GetBytes(filePath)));
+                var fileName = Convert.ToBase64String(
+                    Encoding.UTF8.GetBytes(comparison.Path)
+                );
+                var fileContentResponse = await client.GetAsync($"{fileApi}{fileName}");
                 if (!fileContentResponse.IsSuccessStatusCode)
                 {
                     app.Logger.LogError(
