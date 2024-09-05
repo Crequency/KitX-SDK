@@ -199,6 +199,7 @@ void RunClient(Context context)
                 }
 
                 var fileContent = await fileContentResponse.Content.ReadAsStringAsync();
+                MakeSureFolderExists(filePath);
                 File.WriteAllText(filePath, fileContent);
             }
         }
@@ -252,6 +253,17 @@ string HomePageHtml(
           </body>
       </html>
       """;
+
+void MakeSureFolderExists(string path)
+{
+    var directory = Path.GetDirectoryName(path);
+    if (directory is null) return;
+
+    var directoryInfo = new DirectoryInfo(Path.GetFullPath(directory));
+
+    if (!directoryInfo.Exists)
+        directoryInfo.Create();
+}
 
 partial class Program
 {
