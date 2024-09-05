@@ -8,7 +8,7 @@ public class FileItem
 {
     public string Path { get; }
 
-    public string? Hash { get; private set; }
+    public string? Hash { get; set; }
 
     public FileItem(string path)
     {

@@ -137,6 +137,9 @@ void RunClient(Context context)
 
         var localCatalog = context.GetFiles();
 
+        // app.Logger.LogInformation("Remote catalog: {json}", JsonSerializer.Serialize(catalog, jsonSerializerOptions));
+        // app.Logger.LogInformation("Local catalog: {json}", JsonSerializer.Serialize(localCatalog, jsonSerializerOptions));
+
         var differences = catalog.Concat(localCatalog).GroupBy(
             f => f.Path.RelatedTo(workBase),
             f => f.Hash,
@@ -149,21 +152,57 @@ void RunClient(Context context)
             }
         );
 
-        app.Logger.LogInformation(
-            "Remote: {json1}\n      Local: {json2}\n      Differences: {json3}",
-            JsonSerializer.Serialize(
-                differences.Where(c => c.LocalHash is null && c.RemoteHash is not null),
-                jsonSerializerOptions
-            ),
-            JsonSerializer.Serialize(
-                differences.Where(c => c.RemoteHash is null && c.LocalHash is not null),
-                jsonSerializerOptions
-            ),
-            JsonSerializer.Serialize(
-                differences.Where(c => c.LocalHash is not null && c.RemoteHash is not null && !c.LocalHash.Equals(c.RemoteHash)),
-                jsonSerializerOptions
-            )
-        );
+        // var toDelete = differences.Where(c => c.LocalHash is not null && c.RemoteHash is null).ToList();
+        // var toDownload = differences.Where(c => c.LocalHash is null && c.RemoteHash is not null).ToList();
+        // var toUpdate = differences.Where(c => c.LocalHash is not null && c.RemoteHash is not null && !c.LocalHash.Equals(c.RemoteHash));
+        //
+        // app.Logger.LogInformation(
+        //     "Remote: {json1}\n      Local: {json2}\n      Differences: {json3}",
+        //     JsonSerializer.Serialize(toDelete, jsonSerializerOptions),
+        //     JsonSerializer.Serialize(toDownload, jsonSerializerOptions),
+        //     JsonSerializer.Serialize(toUpdate, jsonSerializerOptions)
+        // );
+
+        foreach (var comparison in differences)
+        {
+            if (comparison.LocalHash is not null && comparison.RemoteHash is not null)
+            {
+                var filePath = Path.Combine(workBase, comparison.Path);
+                if (!File.Exists(filePath))
+                {
+                    app.Logger.LogWarning(
+                        "[{time}] Deleting file ({path}) but it doesn't exist.",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        comparison.Path
+                    );
+                    continue;
+                }
+
+                app.Logger.LogInformation(
+                    "[{time}] Deleting file: {path}",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    comparison.Path
+                );
+                File.Delete(filePath);
+            }
+            else
+            {
+                var filePath = Path.Combine(workBase, comparison.Path);
+                var fileContentResponse = await client.GetAsync(fileApi + Convert.ToBase64String(Encoding.UTF8.GetBytes(filePath)));
+                if (!fileContentResponse.IsSuccessStatusCode)
+                {
+                    app.Logger.LogError(
+                        "[{time}] Failed to fetch file ({path}) content: {statusCode}",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        comparison.Path,
+                        fileContentResponse.StatusCode
+                    );
+                }
+
+                var fileContent = await fileContentResponse.Content.ReadAsStringAsync();
+                File.WriteAllText(filePath, fileContent);
+            }
+        }
     };
     timer.Start();
 
