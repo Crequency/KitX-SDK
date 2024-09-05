@@ -35,7 +35,7 @@ Parser.Default.ParseArguments<CommandLineOptions>(args)
         context.InitializeFileSystemWatcher(
             (e) =>
             {
-                if (context.Filter.ShouldIgnore(e.FullPath) == false)
+                if (context.Filter.Include(e.FullPath))
                     app.Logger.LogInformation(
                         "[{time}] FileSystem Modified: {name}, {changeType} | {path}",
                         DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -88,10 +88,14 @@ void RunServer(Context context)
 
     app.MapGet(
         "/file/{path}",
-        (string path) => context.GetFile(
-            Encoding.UTF8.GetString(
-                Convert.FromBase64String(path)
-            )
+        (string path) => Results.Content(
+            context.GetFile(
+                Encoding.UTF8.GetString(
+                    Convert.FromBase64String(path)
+                )
+            ),
+            "text/plain",
+            Encoding.UTF8
         )
     );
 

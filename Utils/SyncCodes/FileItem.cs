@@ -15,7 +15,7 @@ public class FileItem
         Path = path;
     }
 
-    public FileItem Read(ILogger logger)
+    public FileItem Read(string workBase, ILogger logger)
     {
         // Avoid file not exists exception, sometimes IDE creates temporary files
         try
@@ -23,13 +23,13 @@ public class FileItem
             Policy.Handle<Exception>().Retry(3, (exception, retryCount) =>
             {
                 logger.LogError(
-                    "Error loading sync ignore file: {message}, try times: {retryCount}",
+                    "Error loading file: {message}, try times: {retryCount}",
                     exception.Message,
                     retryCount
                 );
             }).Execute(() =>
             {
-                var content = File.ReadAllText(Path);
+                var content = File.ReadAllText(System.IO.Path.Combine(workBase, Path));
                 var hash = SHA256.HashData(Encoding.UTF8.GetBytes(content));
                 Hash = Convert.ToBase64String(hash);
             });

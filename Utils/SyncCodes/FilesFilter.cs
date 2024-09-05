@@ -8,7 +8,7 @@ public class FilesFilter
 
     public readonly List<string> IgnoredPaths = [];
 
-    public string WorkBase { get; init; }
+    public string WorkBase { get; }
 
     private bool _configFileExists = true;
 
@@ -20,7 +20,7 @@ public class FilesFilter
 
         WorkBase = workBase;
 
-        LoadIgnoreConfig();
+        _ = LoadIgnoreConfig();
     }
 
     public FilesFilter LoadIgnoreConfig()
@@ -30,7 +30,7 @@ public class FilesFilter
 
         var path = Path.Combine(WorkBase, ".sync-ignore");
 
-        if (!File.Exists(path))
+        if (File.Exists(path) == false)
         {
             _configFileExists = false;
             return this;
@@ -71,7 +71,7 @@ public class FilesFilter
         return this;
     }
 
-    public bool ShouldIgnore(string path)
+    private bool ShouldIgnore(string path)
     {
         if (_configFileExists == false) return false;
 
@@ -87,4 +87,6 @@ public class FilesFilter
 
         return false;
     }
+
+    public bool Include(string path) => !ShouldIgnore(path);
 }

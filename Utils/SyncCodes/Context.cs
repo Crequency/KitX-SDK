@@ -72,11 +72,11 @@ public class Context
             Files.Clear();
             Files.AddRange(
                 folder.GetFiles()
-                    .Where(f => Filter.ShouldIgnore(f.FullName) == false)
+                    .Where(f => Filter.Include(f.FullName))
                     .Select(
                         f => new FileItem(
                             Path.GetRelativePath(WorkBase, f.FullName)
-                        ).Read(_logger)
+                        ).Read(WorkBase, _logger)
                     )
                     .Where(f => f.Hash is not null)
             );
@@ -89,11 +89,11 @@ public class Context
                     foldersToSearch.Enqueue(dir);
                 Files.AddRange(
                     subFolder.GetFiles()
-                        .Where(f => Filter.ShouldIgnore(f.FullName) == false)
+                        .Where(f => Filter.Include(f.FullName))
                         .Select(
                             f => new FileItem(
                                 Path.GetRelativePath(WorkBase, f.FullName)
-                            ).Read(_logger)
+                            ).Read(WorkBase, _logger)
                         )
                         .Where(f => f.Hash is not null)
                 );
