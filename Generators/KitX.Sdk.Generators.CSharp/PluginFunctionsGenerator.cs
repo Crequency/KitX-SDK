@@ -1,104 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using KitX.Contract.CSharp.Attributes;
-using KitX.Shared.CSharp.Plugin;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Newtonsoft.Json;
 
 namespace KitX.Sdk.Generators.CSharp;
 
+/// <summary>
+/// 已弃用。该生成器原计划从编译上下文中读取插件函数清单并生成 PluginFunctions.json，
+/// 但当前所有消费方（加载器、客户端）均不再读取该文件，插件函数信息改由插件自身在
+/// PluginInfo.Functions 中提供。该生成器已从所有项目移除 Analyzer 引用，保留此类型
+/// 仅为避免破坏既有二进制引用。
+/// </summary>
+[Obsolete("KitX.Sdk.Generators.CSharp is no longer used; plugin functions are provided by PluginInfo.Functions.")]
 [Generator]
 public class PluginFunctionsGenerator : ISourceGenerator
 {
     public void Initialize(GeneratorInitializationContext context)
     {
-
     }
-
-    //public Dictionary<string, string> GetTranslations(string field, IEnumerable<TranslationAttribute> translations)
-    //{
-    //    var result = new Dictionary<string, string>();
-
-    //    foreach (var item in translations.Where(t => t.Field.Equals(field)))
-    //        result.Add(item.Language, item.Value);
-
-    //    return result;
-    //}
 
     public void Execute(GeneratorExecutionContext context)
     {
-        var entryAttrType = typeof(EntryClassAttribute);
-        var funcAttrType = typeof(FunctionAttribute);
-
-        //var functions = context.Compilation.Assembly.GetAttributes()
-        //    .Where(x => x.AttributeClass?.GetType().Equals(entryAttrType) ?? false)
-        //    .SelectMany(x => x.GetType().GetMethods())
-        //    .Where(f => f.CustomAttributes.Any(
-        //        x => x.AttributeType.Equals(funcAttrType)
-        //    ))
-        //    ;
-
-        //var result = functions.Select(func =>
-        //{
-        //    var parameters = func.GetParameters().Select(param =>
-        //    {
-        //        var paramAttr = param.GetCustomAttribute<ParameterAttribute>()!;
-
-        //        return new Parameter
-        //        {
-        //            Name = paramAttr.Name,
-        //            DisplayNames = GetTranslations("DisplayName", param.GetCustomAttributes<TranslationAttribute>()),
-        //            Type = param.ParameterType.Name,
-        //            IsOptional = param.IsOptional,
-        //        };
-        //    });
-
-        //    var funcAttr = func.GetCustomAttribute<FunctionAttribute>()!;
-
-        //    return new Function
-        //    {
-        //        Name = funcAttr.Name,
-        //        DisplayNames = GetTranslations("DisplayName", func.GetCustomAttributes<TranslationAttribute>()),
-        //        ReturnValueType = func.ReturnType.Name,
-        //        Parameters = parameters.ToList(),
-        //    };
-        //});
-
-        //var sourceText = JsonConvert.SerializeObject(result);
-
-        //context.AddSource("PluginFunctions.json", SourceText.From(sourceText, Encoding.UTF8));
-
-        context.AddSource("Test.json", SourceText.From("", Encoding.UTF8));
-
-        context.ReportDiagnostic(
-            Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "KSDK0001",
-                    "Plugin Info Generated",
-                    "PluginFunctions.json generated successfully.",
-                    "Plugin",
-                    DiagnosticSeverity.Info,
-                    true
-                ),
-            Location.None)
-        );
-
-        context.ReportDiagnostic(
-            Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "KSDK0000",
-                    "Your location",
-                    $"You are at {Path.GetFullPath(".")}",
-                    "Plugin",
-                    DiagnosticSeverity.Warning,
-                    true
-                ),
-            Location.None)
-        );
+        // Intentionally empty: this generator is obsolete and no longer emits source files.
     }
 }
